@@ -1,0 +1,71 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/background" >
+
+    <TextView
+        android:id="@+id/tv_what"
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:text="what is UicPicUp"
+        android:textColor="#BFBFBF"
+        android:textSize="21dp" />
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="fill_parent"
+        android:layout_height="0.1dp"
+        android:layout_below="@id/tv_what"
+        android:background="#6699FF" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@id/view"
+        android:orientation="vertical"
+        android:paddingTop="60dp" >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+               android:layout_gravity="center"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="UicPicUp"
+                android:textColor="#6699ff"
+                android:textSize="40dp"
+               />
+
+            <ImageView 
+                  android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_margin="5dp"
+                android:src="@drawable/love"
+                />
+        </LinearLayout>
+        
+       <Button 
+           android:id="@+id/bt_guest"
+               android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/buttonstyle"
+            android:text="I am guest"
+            android:layout_gravity="center"
+           />
+         <Button 
+             android:id="@+id/bt_join"
+               android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/buttonstyle"
+            android:text="I want join in"
+            android:layout_gravity="center"
+           />
+    </LinearLayout>
+
+</RelativeLayout>

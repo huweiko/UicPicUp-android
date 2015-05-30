@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:orientation="vertical" >
+    <ImageButton 
+        android:id="@+id/ib_back2"
+         android:layout_width="50dp"
+    android:layout_height="50dp"
+    android:layout_alignParentLeft="true"
+	android:background="@drawable/back"
+        />
+    <TextView
+        android:id="@+id/tv_what"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_centerHorizontal="true"
+        android:text="UicPicUp"
+        android:textColor="#BFBFBF"
+        android:textSize="35dp" />
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="fill_parent"
+        android:layout_height="0.1dp"
+        android:layout_below="@id/tv_what"
+        android:background="#6699FF" />
+<TextView 
+    android:layout_marginTop="10dp"
+  android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/view"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:textSize="21dp"
+    android:textColor="#BFBFBF"
+     android:text="The UicPicUp is designed for the UIC students toThe UicPicUo app is designed for the UIC students to look through or post the UIC campus view photo. The uploaded photos can join in the contest and show the best UIC view photo in last month. "
+    />
+</RelativeLayout>
