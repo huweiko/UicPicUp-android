@@ -6,6 +6,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,6 +41,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.Config;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -61,6 +63,7 @@ public class SendPictureActivity extends Activity implements OnClickListener {
 	// 服务器地址
 	private String uploadUrl = "http://www.srcer.com/mydemo/selpic/upload.php";
 	private static final String path = "/sdcard/image.jpg"; 
+	private static final String Picpath = "/sdcard/imageyasuo.jpg"; 
 	// 显示图片
 	private ImageView image;
 	// 两个but
@@ -327,8 +330,9 @@ public class SendPictureActivity extends Activity implements OnClickListener {
 	          + "\""
 	          + end);
 	      dos.writeBytes(end);
-	 
-	      FileInputStream fis = new FileInputStream(path);
+	      Bitmap aa = compressImageFromFile(path);
+	      File pic = saveMyBitmap(aa);
+	      FileInputStream fis = new FileInputStream(pic);
 	      byte[] buffer = new byte[8192]; // 8k
 	      int count = 0;
 	      // 读取文件
@@ -358,8 +362,53 @@ public class SendPictureActivity extends Activity implements OnClickListener {
 	      setTitle(e.getMessage());
 	    }
 	  }
-    
-    
+	//将压缩的bitmap保存到sdcard卡临时文件夹img_interim，用于上传
+	  public File saveMyBitmap(Bitmap bit) {  
+	      File f = new File(Picpath);
+	      try {
+	  		f.createNewFile();
+	  		FileOutputStream fOut = null;
+	  		fOut = new FileOutputStream(f);  
+	  		bit.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+	  		fOut.flush();  
+	  		fOut.close();  
+	  	} catch (IOException e1) {
+	  		// TODO Auto-generated catch block
+	  		f = null;
+	  		e1.printStackTrace();
+	  	}  
+	        
+	      return f;
+	  }
+	  public Bitmap compressImageFromFile(String srcPath) {
+		BitmapFactory.Options newOpts = new BitmapFactory.Options();
+		newOpts.inJustDecodeBounds = true;//只读边,不读内容
+		Bitmap bitmap = BitmapFactory.decodeFile(srcPath, newOpts);
+
+		newOpts.inJustDecodeBounds = false;
+		int w = newOpts.outWidth;
+		int h = newOpts.outHeight;
+		float hh = 320f;//
+		float ww = 240f;//
+		int be = 1;
+		if (w > h && w > ww) {
+			be = (int) (newOpts.outWidth / ww);
+		} else if (w < h && h > hh) {
+			be = (int) (newOpts.outHeight / hh);
+		}
+		if (be <= 0)
+			be = 1;
+		newOpts.inSampleSize = be;//设置采样率
+		
+		newOpts.inPreferredConfig = Config.ARGB_8888;//该模式是默认的,可不设
+		newOpts.inPurgeable = true;// 同时设置才会有效
+		newOpts.inInputShareable = true;//。当系统内存不够时候图片自动被回收
+		
+		bitmap = BitmapFactory.decodeFile(srcPath, newOpts);
+//			return compressBmpFromBmp(bitmap);//原来的方法调用了这个方法企图进行二次压缩
+									//其实是无效的,大家尽管尝试
+		return bitmap;
+	}
     
   
 	

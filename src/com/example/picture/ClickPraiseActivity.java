@@ -29,6 +29,7 @@ import com.example.picture.servlet.VoteTo;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.widget.GridView;
@@ -41,7 +42,7 @@ public class ClickPraiseActivity extends Activity implements OnClickListener{
 	private ImageView mImageViewBigPic;
 	private Button mButtonImageClose;
 	private ApplicationData app=(ApplicationData) getApplication();
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		
@@ -122,18 +123,27 @@ public class ClickPraiseActivity extends Activity implements OnClickListener{
 			// strLocalImag: /mnt/sdcard_title2.jpg
 			String strLocalImag = Environment.getExternalStorageDirectory() + "/DCIM/" +picinfo[0] +"_.jpg";
 			System.out.println("strLocalImag: "+strLocalImag);
-			Bitmap bm =BitmapFactory.decodeFile(strLocalImag);
+			Bitmap bm =null;
+			try {
+
+			    // 实例化Bitmap
+
+				bm = BitmapFactory.decodeFile(strLocalImag);
+
+			} catch (OutOfMemoryError e) {
+//				bm = compressImageFromFile(strLocalImag);
+			    //
+			}
+
 			map.put("image", bm);
 			map.put("button", "");
 			list.add(map);
-			
 			/*
 			Map<String, Object> item = new HashMap<String, Object>();
 			item.put("imageItem", bp[i]);// 添加图像资源的ID
 			String[] myPicInfo = (arrpics[i].split(","))[1].split("/");
 			item.put("textItem", myPicInfo[3]);// 按序号添加ItemText
 			items.add(item);*/
-
 		}
 		
 		
@@ -364,5 +374,33 @@ gv_timage.setOnItemClickListener(new OnItemClickListener() {
                         (int) height, matrix, true);  
         return bitmap;  
     }  
+	  public Bitmap compressImageFromFile(String srcPath) {
+		BitmapFactory.Options newOpts = new BitmapFactory.Options();
+		newOpts.inJustDecodeBounds = true;//只读边,不读内容
+		Bitmap bitmap = BitmapFactory.decodeFile(srcPath, newOpts);
 
+		newOpts.inJustDecodeBounds = false;
+		int w = newOpts.outWidth;
+		int h = newOpts.outHeight;
+		float hh = 320f;//
+		float ww = 240f;//
+		int be = 1;
+		if (w > h && w > ww) {
+			be = (int) (newOpts.outWidth / ww);
+		} else if (w < h && h > hh) {
+			be = (int) (newOpts.outHeight / hh);
+		}
+		if (be <= 0)
+			be = 1;
+		newOpts.inSampleSize = be;//设置采样率
+		
+		newOpts.inPreferredConfig = Config.ARGB_8888;//该模式是默认的,可不设
+		newOpts.inPurgeable = true;// 同时设置才会有效
+		newOpts.inInputShareable = true;//。当系统内存不够时候图片自动被回收
+		
+		bitmap = BitmapFactory.decodeFile(srcPath, newOpts);
+//			return compressBmpFromBmp(bitmap);//原来的方法调用了这个方法企图进行二次压缩
+									//其实是无效的,大家尽管尝试
+		return bitmap;
+	}
 }

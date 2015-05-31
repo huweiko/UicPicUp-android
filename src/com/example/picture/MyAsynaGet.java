@@ -27,7 +27,7 @@ public class MyAsynaGet extends AsyncTask<String, Integer, String>{
 	protected String doInBackground(String... arg0) {
 		// TODO Auto-generated method stub
 		HttpResponse httpResponse = null; 
-		String url = "http://www.srcer.com/mydemo/selpic/getphoto.php?uemail=" + arg0[0];
+		String url = "http://www.srcer.com/mydemo/selpic/getphoto.php?uemail=" + "fg";
 		
 		System.out.println("url:" + url );
 		// 使用网络连接类HttpClient
