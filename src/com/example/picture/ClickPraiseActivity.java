@@ -1,12 +1,15 @@
 package com.example.picture;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap; 
+import java.util.LinkedList;
 
 import android.app.Activity;
-
-
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,13 +23,14 @@ import android.widget.SimpleAdapter;
 import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
 import com.example.picture.servlet.GetUserInfo;
 import com.example.picture.servlet.VoteTo;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -41,8 +45,33 @@ public class ClickPraiseActivity extends Activity implements OnClickListener{
 	private RelativeLayout mRelativeLayoutBigPic;
 	private ImageView mImageViewBigPic;
 	private Button mButtonImageClose;
-	private ApplicationData app=(ApplicationData) getApplication();
-
+	SimpleAdapter adapter;
+	List<Map<String,Object>> list=new ArrayList<Map<String,Object>>();
+	protected RequestDialog requestDialog;
+	/**
+	 * 显示对话框
+	 * @param strId
+	 */
+	public void showReqeustDialog(int strId){
+		if(requestDialog == null){
+			requestDialog = new RequestDialog(this);
+		}
+		requestDialog.setCancelable(false);
+		requestDialog.setMessage(getString(strId));
+		
+		if(!requestDialog.isShowing()){
+			requestDialog.show();
+		}
+	}
+	
+	/**
+	 * 取消对话框
+	 */
+	public void cancelRequestDialog(){
+		if(requestDialog != null && requestDialog.isShowing()){
+			requestDialog.cancel();
+		}
+	}
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		
@@ -58,7 +87,6 @@ public class ClickPraiseActivity extends Activity implements OnClickListener{
 				System.out.println("@@@@ name: "+ UserData.getName());
 	    //
 		super.onCreate(savedInstanceState);
-		
 		System.out.println("@@@@@@@3 UserData.getName(): "+ UserData.getName());
 		setContentView(R.layout.activity6_main);
 		System.out.println("@@@@@@@4");
@@ -81,80 +109,12 @@ public class ClickPraiseActivity extends Activity implements OnClickListener{
 		ib_home.setOnClickListener(this);
 		ib_camera.setOnClickListener(this);
 		ib_back8.setOnClickListener(this);
-		List<Map<String,Object>> list=new ArrayList<Map<String,Object>>();
-		
-		//从远程服务器上获取图片地址
-		MyAsynaGet mTask = new MyAsynaGet();
-		String strRet = null;
-		try {
-			strRet = mTask.execute(UserData.getEmail()).get();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println(" ClickPraiseActivity @@@@@strRet[" + strRet + "]");
-		
-		// 准备要添加的数据条目
-		List<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
-		String[] arrpics = strRet.split(";");
-		System.out.println("arrpics.length: " +arrpics.length);
-		for (int i = 0; i < arrpics.length; i++) {
-			System.out.println("down now!");
-			// 获取下载图片的URL
-			String[] picinfo = arrpics[i].split(",");
-			MyAsynaPhoto mPhotoTask = new MyAsynaPhoto();
-			System.out.println("get image: "+picinfo[1]);
-			try {
-				mPhotoTask.execute(picinfo[0],picinfo[1]).get();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-		
-			Map<String,Object> map=new HashMap<String,Object>();
-			map.put("title", picinfo[0]);
-			// strLocalImag: /mnt/sdcard_title2.jpg
-			String strLocalImag = Environment.getExternalStorageDirectory() + "/DCIM/" +picinfo[0] +"_.jpg";
-			System.out.println("strLocalImag: "+strLocalImag);
-			Bitmap bm =null;
-			try {
-
-			    // 实例化Bitmap
-
-				bm = BitmapFactory.decodeFile(strLocalImag);
-
-			} catch (OutOfMemoryError e) {
-//				bm = compressImageFromFile(strLocalImag);
-			    //
-			}
-
-			map.put("image", bm);
-			map.put("button", "");
-			list.add(map);
-			/*
-			Map<String, Object> item = new HashMap<String, Object>();
-			item.put("imageItem", bp[i]);// 添加图像资源的ID
-			String[] myPicInfo = (arrpics[i].split(","))[1].split("/");
-			item.put("textItem", myPicInfo[3]);// 按序号添加ItemText
-			items.add(item);*/
-		}
-		
 		
 		/*
 		Map<String,Object> map=new HashMap<String,Object>();
 		map.put("title", "大门");
 		map.put("image", R.drawable.a);
 		map.put("button", "");
-		
-		
-		
 		Map<String,Object> map2=new HashMap<String,Object>();
 		map2.put("title", "广场");
 		map2.put("image", R.drawable.a);
@@ -216,9 +176,155 @@ public class ClickPraiseActivity extends Activity implements OnClickListener{
 		list.add(map11);
 		list.add(map12);
 		list.add(map13); */
+		showReqeustDialog(R.string.load_pic_list);
+		      	//提交到服务器
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				
+				getUrlPictureList();
+				mHandler.sendEmptyMessage(MSG_UPDATE_PICLIST);
+				cancelRequestDialog();
+			}
+		}).start();
 		
 		
-		SimpleAdapter adapter=new SimpleAdapter(this, list, R.layout.list_aitem, new String[]{"title","image","button"}, new int[]{R.id.title,R.id.image,R.id.button})
+	}
+	private static final int MSG_UPDATE_PICLIST = 0x0001;
+	Handler mHandler = new Handler(){
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case MSG_UPDATE_PICLIST:
+				adapter.setViewBinder(new ViewBinder() {  
+		            
+		            public boolean setViewValue(View view, Object data,  
+		                    String textRepresentation) {  
+		                //判断是否为我们要处理的对象  
+		                if(view instanceof ImageView  && data instanceof Bitmap){  
+		                    ImageView iv = (ImageView) view;  
+		                    final Bitmap bitmap = (Bitmap) data;
+		                    iv.setImageBitmap(zoomImage(bitmap, 128, 128)); 
+		                    iv.setOnClickListener(new OnClickListener() {
+		                        @Override
+		                        public void onClick(View v) {
+		                        	mRelativeLayoutBigPic.setVisibility(View.VISIBLE);
+		                        	Log.i("hhhh", "w = "+bitmap.getWidth() +"  h = "+bitmap.getHeight());
+		                        	Log.i("rrrr", "w = "+gv_timage.getWidth() +"  h = "+gv_timage.getHeight());
+		                        	double bili = (double)gv_timage.getWidth()/(double)bitmap.getWidth();
+		                        	Log.i("比例", "bili = "+bili);
+		                        	double w = gv_timage.getWidth();
+		                        	double h = bitmap.getHeight()*bili;
+		                        	mImageViewBigPic.setImageBitmap(zoomImage(bitmap,w,h));
+		                        }
+		                    });
+		                    return true;  
+		                }else  
+		                return false;  
+		            }  
+		        });
+
+
+			
+				//绑定适配器
+				gv_timage.setAdapter(adapter);     
+				
+				//设置背景颜色选择器
+				//listview.setSelector(R.drawable.on_item_selected);
+				
+				//设置焦点响应问题    同时要将 item 中的焦点 focusable 设置为 false
+				gv_timage.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+				
+				//设置 item 的监听事件
+				gv_timage.setOnItemClickListener(new OnItemClickListener() {
+			    @Override
+				    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				        
+				        //获得 item 里面的文本控件
+				       // TextView text1=(TextView)view.findViewById(R.id.text1);
+				        //Toast.makeText(getApplicationContext(), text1.getText().toString(), Toast.LENGTH_SHORT).show();
+				    }
+				});
+				break;
+
+			default:
+				break;
+			}
+			
+		};
+	};
+	private void getUrlPictureList() {
+		
+		//从远程服务器上获取图片地址
+		MyAsynaGet mTask = new MyAsynaGet();
+		String strRet = null;
+		try {
+			strRet = mTask.execute(UserData.getEmail()).get();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(" ClickPraiseActivity @@@@@strRet[" + strRet + "]");
+		
+		// 准备要添加的数据条目
+		List<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
+		String[] arrpics = strRet.split(";");
+		System.out.println("arrpics.length: " +arrpics.length);
+		for (int i = 0; i < arrpics.length; i++) {
+			System.out.println("down now!");
+			// 获取下载图片的URL
+			String[] picinfo = arrpics[i].split(",");
+			MyAsynaPhoto mPhotoTask = new MyAsynaPhoto();
+			System.out.println("get image: "+picinfo[1]);
+			try {
+				mPhotoTask.execute(picinfo[0],picinfo[1]).get();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		
+			Map<String,Object> map=new HashMap<String,Object>();
+
+			
+			// strLocalImag: /mnt/sdcard_title2.jpg
+			String strLocalImag = Environment.getExternalStorageDirectory() + "/DCIM/" +picinfo[0] +"_.jpg";
+			System.out.println("strLocalImag: "+strLocalImag);
+			Bitmap bm =null;
+			try {
+			    // 实例化Bitmap
+				bm = BitmapFactory.decodeFile(strLocalImag);
+
+			} catch (OutOfMemoryError e) {
+			    //
+			}
+			
+			if(picinfo[0].equals("") || picinfo[0].equals("nip")){
+				map.put("title", "nip");
+				Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.ic_error); 
+				map.put("image", bmp);
+				
+			}else{
+				map.put("title", picinfo[0]);
+				map.put("image", bm);
+				
+			}
+			
+			map.put("button", "");
+			list.add(map);
+			
+			/*Map<String, Object> item = new HashMap<String, Object>();
+			item.put("imageItem", bp[i]);// 添加图像资源的ID
+			String[] myPicInfo = (arrpics[i].split(","))[1].split("/");
+			item.put("textItem", myPicInfo[3]);// 按序号添加ItemText
+			items.add(item);*/
+		}
+		adapter=new SimpleAdapter(this, list, R.layout.list_aitem, new String[]{"title","image","button"}, new int[]{R.id.title,R.id.image,R.id.button})
 		{
             //在这个重写的函数里设置 每个 item 中按钮的响应事件
             @Override
@@ -286,59 +392,6 @@ public class ClickPraiseActivity extends Activity implements OnClickListener{
             }
            
 		};
-		
-
-		 adapter.setViewBinder(new ViewBinder() {  
-            
-            public boolean setViewValue(View view, Object data,  
-                    String textRepresentation) {  
-                //判断是否为我们要处理的对象  
-                if(view instanceof ImageView  && data instanceof Bitmap){  
-                    ImageView iv = (ImageView) view;  
-                    final Bitmap bitmap = (Bitmap) data;
-                    iv.setImageBitmap(bitmap);  
-                    iv.setOnClickListener(new OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                        	mRelativeLayoutBigPic.setVisibility(View.VISIBLE);
-                        	Log.i("hhhh", "w = "+bitmap.getWidth() +"  h = "+bitmap.getHeight());
-                        	Log.i("rrrr", "w = "+gv_timage.getWidth() +"  h = "+gv_timage.getHeight());
-                        	float bili = gv_timage.getWidth()/bitmap.getWidth();
-                        	double w = gv_timage.getWidth();
-                        	double h = bitmap.getHeight()*bili;
-                        	mImageViewBigPic.setImageBitmap(zoomImage(bitmap,w,h));
-                        }
-                    });
-                    return true;  
-                }else  
-                return false;  
-            }  
-        });
-
-
-
-//绑定适配器
-gv_timage.setAdapter(adapter);     
-
-//设置背景颜色选择器
-//listview.setSelector(R.drawable.on_item_selected);
-
-//设置焦点响应问题    同时要将 item 中的焦点 focusable 设置为 false
-gv_timage.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-
-//设置 item 的监听事件
-gv_timage.setOnItemClickListener(new OnItemClickListener() {
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        
-        //获得 item 里面的文本控件
-       // TextView text1=(TextView)view.findViewById(R.id.text1);
-        //Toast.makeText(getApplicationContext(), text1.getText().toString(), Toast.LENGTH_SHORT).show();
-    }
-});
-
-		
-		
 	}
 	@Override
 	public void onClick(View arg0) {
@@ -374,7 +427,7 @@ gv_timage.setOnItemClickListener(new OnItemClickListener() {
                         (int) height, matrix, true);  
         return bitmap;  
     }  
-	  public Bitmap compressImageFromFile(String srcPath) {
+	public Bitmap compressImageFromFile(String srcPath) {
 		BitmapFactory.Options newOpts = new BitmapFactory.Options();
 		newOpts.inJustDecodeBounds = true;//只读边,不读内容
 		Bitmap bitmap = BitmapFactory.decodeFile(srcPath, newOpts);

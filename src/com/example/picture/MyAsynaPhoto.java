@@ -41,7 +41,10 @@ public class MyAsynaPhoto extends AsyncTask<String, Integer, Bitmap>{
 	             Log.i("LogDemo", "###end");
 	             inputStream.close();  */
 	             
-	             
+	        	if(arg0[0].equals("") || arg0[0].equals("nip")){
+	        		Log.i("not picture", "url = "+arg0[1]); 
+		    		 return bitmap;
+		    	 }
 		    	 String url =arg0[1];
 		    	 System.out.println(url);
 		    	 Bitmap tmpBitmap = null;  

@@ -269,6 +269,11 @@ public class SendPictureActivity extends Activity implements OnClickListener {
 			break;
 		case R.id.bt_submit:
 			//发送请求，获取结果，相应处理
+			final String strTitle = tv_title.getText().toString();
+			if(strTitle.equals("")){
+				Toast.makeText(getApplicationContext(), "图片名称不能为空", Toast.LENGTH_SHORT).show();
+				return;
+			}
 			new Thread() {
 				@Override
 				public void run() {
@@ -276,7 +281,7 @@ public class SendPictureActivity extends Activity implements OnClickListener {
 					
 
 	
-					String strTitle = tv_title.getText().toString();
+					
 					String strEmail= UserData.getEmail();
 					SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyyMMddhhmmss");       
 					String date = sDateFormat.format(new java.util.Date());

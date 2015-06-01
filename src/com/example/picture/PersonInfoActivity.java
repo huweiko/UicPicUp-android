@@ -1,27 +1,7 @@
 package com.example.picture;
 
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-
-import com.example.picture.servlet.GetUserInfo;
-import com.example.picture.servlet.LoginToServer;
 import com.example.picture.servlet.UpdateUserInfo;
 import com.example.picture.util.ImageTools;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -39,6 +19,7 @@ public class PersonInfoActivity extends Activity implements OnClickListener{
 	private TextView tv_email, tv_name;
 	private String strName, strEmail;
 	private ImageView mImageViewUserImage;
+	private ImageButton ib_back2,ib_back5;
 	private static final int SCALE = 5;// 照片缩小比例
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +30,10 @@ public class PersonInfoActivity extends Activity implements OnClickListener{
 		ib_save=(ImageButton)findViewById(R.id.bt_save);
 		tv_name=(TextView)findViewById(R.id.tv_name);
 		tv_email=(TextView)findViewById(R.id.tv_email);
+		ib_back2=(ImageButton) findViewById(R.id.ib_back2);
+		ib_back5=(ImageButton) findViewById(R.id.ib_back5);
+		ib_back2.setOnClickListener(this);
+		ib_back5.setOnClickListener(this);
 		mImageViewUserImage=(ImageView)findViewById(R.id.ImageViewUserImage);
 		// 将保存在本地的图片取出并缩小后显示在界面上
 		Bitmap bitmap = BitmapFactory.decodeFile(Environment
@@ -109,6 +94,18 @@ public class PersonInfoActivity extends Activity implements OnClickListener{
 	@Override
 	public void onClick(View arg0) {
 		// TODO Auto-generated method stub
-		
+		switch (arg0.getId()) {
+		case R.id.ib_back2:
+			Intent intent2=new Intent(this,MainActivity.class);
+			startActivity(intent2);
+			break;
+		case R.id.ib_back5:
+			Intent intent5=new Intent(this,APictureShowActivity.class);
+			startActivity(intent5);
+			break;
+
+		default:
+			break;
+		}
 	}
 }
