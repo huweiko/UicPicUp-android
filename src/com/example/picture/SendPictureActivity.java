@@ -76,7 +76,8 @@ public class SendPictureActivity extends Activity implements OnClickListener {
 	private Bitmap upbitmap;
 	private Button up;
 	private TextView tv_title;
-
+	private int pathstatus = 0;
+	Uri originalUri = null;
 	// 多线程通信
 	private Handler myHandler=new Handler(){
 		public void handleMessage(Message msg) {
@@ -118,6 +119,7 @@ public class SendPictureActivity extends Activity implements OnClickListener {
 		if (resultCode == RESULT_OK) {
 			switch (requestCode) {
 			case TAKE_PICTURE:
+				pathstatus = 0;
 				// 将保存在本地的图片取出并缩小后显示在界面上
 				Bitmap bitmap = BitmapFactory.decodeFile(Environment
 						.getExternalStorageDirectory() + "/image.jpg");
@@ -134,9 +136,11 @@ public class SendPictureActivity extends Activity implements OnClickListener {
 				break;
 
 			case CHOOSE_PICTURE:
+				pathstatus = 1;
 				ContentResolver resolver = getContentResolver();
 				// 照片的原始资源地址
-				Uri originalUri = data.getData();
+				originalUri = data.getData();
+				
 				try {
 					// 使用ContentProvider通过URI获取原始图片
 					Bitmap photo = MediaStore.Images.Media.getBitmap(resolver,
@@ -291,6 +295,9 @@ public class SendPictureActivity extends Activity implements OnClickListener {
 					//System.out.println("email："+email+",password:"+password+"result:"+result);
 				}
 			}.start();
+			Intent intent2=new Intent(this,ClickPraiseActivity.class);
+			startActivity(intent2);
+			finish();
 			break;
 		default:
 			break;
@@ -335,7 +342,15 @@ public class SendPictureActivity extends Activity implements OnClickListener {
 	          + "\""
 	          + end);
 	      dos.writeBytes(end);
-	      Bitmap aa = compressImageFromFile(path);
+	      Bitmap aa = null;
+	      if(pathstatus == 1){
+	    	  ContentResolver resolver = getContentResolver();
+	    	  aa = MediaStore.Images.Media.getBitmap(resolver,
+						originalUri);
+	      }else{
+	    	  aa = compressImageFromFile(path);
+	      }
+	      
 	      File pic = saveMyBitmap(aa);
 	      FileInputStream fis = new FileInputStream(pic);
 	      byte[] buffer = new byte[8192]; // 8k

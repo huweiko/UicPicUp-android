@@ -1,11 +1,13 @@
 package com.example.picture;
 
+import com.example.picture.UserData.Preference;
 import com.example.picture.servlet.LoginToServer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -23,6 +25,7 @@ public class UserActivity extends Activity implements OnClickListener{
 	private ImageButton ib_back2;
 	private Button bt_signup,bt_log;
 	private EditText et_email,et_password;
+	public SharedPreferences preferences;
 	private Handler myHandler=new Handler(){
 
 		@Override
@@ -54,6 +57,13 @@ public class UserActivity extends Activity implements OnClickListener{
 		ib_back2.setOnClickListener(this);
 		bt_signup.setOnClickListener(this);
 		bt_log.setOnClickListener(this);
+		if (null == preferences) {
+			preferences = Preference.getSharedPreferences(this);
+		} 
+		String uname = preferences.getString(Preference.UNAME, "");
+		String pwd = preferences.getString(Preference.PWD, "");
+		et_email.setText(uname);
+		et_password.setText(pwd);
 	}
 	@Override
 	public void onClick(View arg0) {
@@ -83,6 +93,8 @@ public class UserActivity extends Activity implements OnClickListener{
 				if(result.equals("1")) {
 					//设置全局变量
 					UserData.setEmail(email);
+					preferences.edit().putString(Preference.UNAME, email).commit();
+					preferences.edit().putString(Preference.PWD, password).commit();
 					Message msg=Message.obtain();
 					msg.what=1;
 					myHandler.sendMessage(msg);

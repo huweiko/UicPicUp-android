@@ -127,18 +127,17 @@ public final class R {
         public static final int save=0x7f020021;
     }
     public static final class id {
-        public static final int ButtonImageClose=0x7f090012;
-        public static final int ImageViewBigPic=0x7f090011;
-        public static final int ImageViewUserImage=0x7f090022;
+        public static final int ButtonImageClose=0x7f090015;
+        public static final int ImageViewBigPic=0x7f090014;
         public static final int LinearLayout1=0x7f090027;
-        public static final int RelativeLayoutBigPic=0x7f090010;
+        public static final int RelativeLayoutBigPic=0x7f090013;
         public static final int action_settings=0x7f09002b;
         public static final int bt_edit=0x7f09001f;
         public static final int bt_guest=0x7f090007;
         public static final int bt_join=0x7f090008;
         public static final int bt_log=0x7f090003;
         public static final int bt_post=0x7f090017;
-        public static final int bt_save=0x7f090024;
+        public static final int bt_save=0x7f090020;
         public static final int bt_signup=0x7f090004;
         public static final int bt_submit=0x7f09001a;
         public static final int button=0x7f090026;
@@ -151,9 +150,9 @@ public final class R {
         public static final int ib_back4=0x7f09000d;
         public static final int ib_back5=0x7f09000b;
         public static final int ib_back6=0x7f090016;
-        public static final int ib_back8=0x7f090015;
-        public static final int ib_camera=0x7f090014;
-        public static final int ib_home=0x7f090013;
+        public static final int ib_back8=0x7f090012;
+        public static final int ib_camera=0x7f090011;
+        public static final int ib_home=0x7f090010;
         public static final int image=0x7f090025;
         public static final int iv_aimage=0x7f09000e;
         public static final int iv_image=0x7f090018;
@@ -164,12 +163,13 @@ public final class R {
         public static final int pb=0x7f090029;
         public static final int rl=0x7f09000a;
         public static final int rl1=0x7f09001d;
-        public static final int textView1=0x7f090020;
+        public static final int textView1=0x7f090022;
         public static final int title=0x7f090019;
         public static final int tvMsg=0x7f09002a;
-        public static final int tv_email=0x7f090021;
-        public static final int tv_name=0x7f090023;
+        public static final int tv_email=0x7f090023;
+        public static final int tv_name=0x7f090021;
         public static final int tv_what=0x7f090005;
+        public static final int user_timage=0x7f090024;
         public static final int view=0x7f090006;
     }
     public static final class layout {

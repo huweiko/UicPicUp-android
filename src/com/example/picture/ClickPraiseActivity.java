@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -258,7 +260,8 @@ public class ClickPraiseActivity extends Activity implements OnClickListener{
 		MyAsynaGet mTask = new MyAsynaGet();
 		String strRet = null;
 		try {
-			strRet = mTask.execute(UserData.getEmail()).get();
+			//獲取所有圖片
+			strRet = mTask.execute("all").get();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -276,47 +279,52 @@ public class ClickPraiseActivity extends Activity implements OnClickListener{
 			System.out.println("down now!");
 			// 获取下载图片的URL
 			String[] picinfo = arrpics[i].split(",");
-			MyAsynaPhoto mPhotoTask = new MyAsynaPhoto();
-			System.out.println("get image: "+picinfo[1]);
-			try {
-				mPhotoTask.execute(picinfo[0],picinfo[1]).get();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			String strLocalImag = Environment.getExternalStorageDirectory() + "/DCIM/" +picinfo[0] +"_.jpg";
+			File f = new File(strLocalImag);
+			if(!f.exists()){
+				MyAsynaPhoto mPhotoTask = new MyAsynaPhoto();
+				System.out.println("get image: "+picinfo[1]);
+				try {
+					mPhotoTask.execute(picinfo[0],picinfo[1]).get();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-			
 		
 			Map<String,Object> map=new HashMap<String,Object>();
 
 			
 			// strLocalImag: /mnt/sdcard_title2.jpg
-			String strLocalImag = Environment.getExternalStorageDirectory() + "/DCIM/" +picinfo[0] +"_.jpg";
 			System.out.println("strLocalImag: "+strLocalImag);
-			Bitmap bm =null;
-			try {
-			    // 实例化Bitmap
-				bm = BitmapFactory.decodeFile(strLocalImag);
-
-			} catch (OutOfMemoryError e) {
-			    //
-			}
 			
 			if(picinfo[0].equals("") || picinfo[0].equals("nip")){
-				map.put("title", "nip");
+				/*map.put("title", "nip");
 				Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.ic_error); 
 				map.put("image", bmp);
-				
+				*/
 			}else{
-				map.put("title", picinfo[0]);
-				map.put("image", bm);
+				Bitmap bm =null;
+				try {
+				    // 实例化Bitmap
+					bm = BitmapFactory.decodeFile(strLocalImag);
+					if(bm != null){
+						map.put("title", picinfo[0]);
+						map.put("image", bm);
+						map.put("button", "");
+						list.add(map);
+					}
+
+				} catch (OutOfMemoryError e) {
+				    //
+				}
 				
 			}
 			
-			map.put("button", "");
-			list.add(map);
+			
 			
 			/*Map<String, Object> item = new HashMap<String, Object>();
 			item.put("imageItem", bp[i]);// 添加图像资源的ID
